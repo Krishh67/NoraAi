@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nora AI - Productivity Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <!-- Fixed Navbar -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-left">
+                <div class="logo-nav">
+                    <i class="fas fa-brain"></i>
+                    <div>
+                        <span class="nav-title">Nora AI</span>
+                        <span class="nav-subtitle">Productivity Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            <div class="feature-icons">
+                <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                <div class="feature-icon"><i class="fas fa-search"></i></div>
+                <div class="feature-icon"><i class="fas fa-filter"></i></div>
+                <div class="feature-icon"><i class="fas fa-download"></i></div>
+                <div class="feature-icon"><i class="fas fa-share"></i></div>
+                <div class="feature-icon"><i class="fas fa-cog"></i></div>
+                
+                <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+            </div>
+            <div class="nav-right">
+                <div class="streak-indicator">
+                    <i class="fas fa-fire"></i>
+                    <span id="streakCount">{{ stats.productivity_streak }} day streak!</span>
+                </div>
+                <div class="user-profile">
+                    <span>U</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <button id="notifyBtn" style="position:fixed;top:20px;right:20px;z-index:9999;">Enable Notifications</button>
+    <div class="dashboard-container">
+        <main class="main-content">
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card stat-purple">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Today's Focus</p>
+                            <p class="stat-value" id="todayFocus">{{ stats.today_focus }}</p>
+                        </div>
+                        <i class="fas fa-clock stat-icon"></i>
+                    </div>
+                </div>
+                <div class="stat-card stat-blue">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Productivity Streak</p>
+                            <p class="stat-value" id="productivityStreak">{{ stats.productivity_streak }}</p>
+                        </div>
+                        <i class="fas fa-fire stat-icon"></i>
+                    </div>
+                </div>
+                <div class="stat-card stat-green">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Weekly Goal</p>
+                            <p class="stat-value" id="weeklyGoal">{{ stats.weekly_goal }}</p>
+                        </div>
+                        <i class="fas fa-target stat-icon"></i>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <p class="stat-label">Tasks Done</p>
+                            <p class="stat-value" id="tasksDone">{{ stats.tasks_done }}</p>
+                        </div>
+                        <i class="fas fa-check-circle stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- Nora Character & Current Activity -->
+            <div class="cards-row">
+                <div class="card nora-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-brain"></i> Meet Nora</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="nora-character" id="noraCharacter">
+                            <div class="character-container">
+                                <div class="character-face" id="characterFace">
+                                    <div class="character-emoji" id="characterEmoji">{{ nora.emoji }}</div>
+                                    <div class="character-ring"></div>
+                                    <div class="character-sparkles" id="characterSparkles">
+                                        <i class="fas fa-sparkles sparkle-1"></i>
+                                        <i class="fas fa-sparkles sparkle-2"></i>
+                                        <i class="fas fa-sparkles sparkle-3"></i>
+                                    </div>
+                                </div>
+                                <div class="character-status">
+                                    <div class="status-dot"></div>
+                                </div>
+                                <div class="floating-elements">
+                                    <div class="float-element float-1"></div>
+                                    <div class="float-element float-2"></div>
+                                    <div class="float-element float-3"></div>
+                                </div>
+                            </div>
+                            <div class="dialogue-box" id="dialogueBox">
+                                <div class="dialogue-tail"></div>
+                                <div id="noraDialogue">{{ nora.dialogue|safe }}</div>
+                                <div class="typing-indicator" id="typingIndicator">
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                    <div class="typing-dot"></div>
+                                </div>
+                            </div>
+                            <div class="mood-indicator">
+                                <span class="mood-text">Mood: <span id="moodText">{{ nora.mood }}</span></span>
+                                <div class="mood-dot" id="moodDot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card activity-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Current Productivity Session</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="current-session">
+                            <div class="session-icon">
+                                <i class="fas fa-target"></i>
+                            </div>
+                            <div class="session-info">
+                                <h4 id="sessionName">{{ session.name }}</h4>
+                                <p id="sessionProject">Project: {{ session.project }}</p>
+                            </div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <span>Session Progress</span>
+                                <span id="sessionProgress">{{ session.progress }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ session.progress }}%"></div>
+                            </div>
+                        </div>
+                        <div class="session-stats">
+                            <div class="session-stat">
+                                <div class="stat-number">{{ session.time_spent }}</div>
+                                <div class="stat-label">Time Spent</div>
+                            </div>
+                            <div class="session-stat">
+                                <div class="stat-number">{{ session.tasks_done }}</div>
+                                <div class="stat-label">Tasks Done</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tasks & Schedule -->
+            <div class="cards-row">
+                <div class="card tasks-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-check-circle"></i> Today's Tasks</h3>
+                        <span class="badge">{{ tasks|selectattr('done', 'equalto', false)|list|length }} pending</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="tasks-list" id="tasksList">
+                            {% for task in tasks %}
+                                <div class="task-item{% if task.done %} done{% endif %}">
+                                    <input type="checkbox" {% if task.done %}checked{% endif %} disabled>
+                                    <span>{{ task.title }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card schedule-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar"></i> Today's Schedule</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="schedule-list" id="scheduleList">
+                            {% for item in schedule %}
+                                <div class="schedule-item">
+                                    <span class="schedule-time">{{ item.time }}</span>
+                                    <span class="schedule-event">{{ item.event }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Analytics -->
+            <div class="card analytics-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-bar"></i> Weekly Productivity Analytics</h3>
+                </div>
+                <div class="card-content">
+                    <div class="analytics-stats">
+                        <div class="analytics-stat">
+                            <div class="stat-number">{{ analytics.total_focus }}</div>
+                            <div class="stat-label">Total Focus Time</div>
+                        </div>
+                        <div class="analytics-stat">
+                            <div class="stat-number">{{ analytics.daily_avg }}</div>
+                            <div class="stat-label">Daily Average</div>
+                        </div>
+                        <div class="analytics-stat">
+                            <div class="stat-number">{{ analytics.efficiency }}</div>
+                            <div class="stat-label">Efficiency Score</div>
+                        </div>
+                    </div>
+                    <div class="analytics-breakdown" id="analyticsBreakdown">
+                        {% for day in analytics.breakdown %}
+                            <div class="breakdown-item">
+                                <span class="breakdown-day">{{ day.day }}</span>
+                                <span class="breakdown-focus">{{ day.focus }}h</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <!-- Focus Timer at Bottom -->
+            <div class="card timer-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock"></i> Focus Timer</h3>
+                </div>
+                <div class="card-content">
+                    <div class="timer-container">
+                        <div class="timer-display">
+                            <svg class="timer-circle" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" class="timer-track"></circle>
+                                <circle cx="50" cy="50" r="45" class="timer-progress" id="timerProgress"></circle>
+                            </svg>
+                            <div class="timer-text">
+                                <div class="timer-time" id="timerTime">25:00</div>
+                                <div class="timer-status" id="timerStatus">Ready?</div>
+                            </div>
+                        </div>
+                        <div class="timer-controls">
+                            <div class="timer-buttons">
+                                <button class="timer-btn timer-play" id="timerPlayBtn" disabled>
+                                    <i class="fas fa-play" id="timerIcon"></i>
+                                </button>
+                                <button class="timer-btn timer-reset" disabled>
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                            <p class="timer-message" id="timerMessage">Ready for a productive session?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Chat Sidebar (static, not functional) -->
+        <aside class="chat-sidebar">
+            <div class="chat-header">
+                <div class="chat-avatar">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="chat-info">
+                    <h3>Nora AI</h3>
+                    <span class="chat-status">Your Productivity Coach</span>
+                </div>
+                <div class="chat-online">
+                    <div class="online-dot"></div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hey there! I'm Nora, your AI productivity companion! 🌟 Ready to boost your productivity today?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <div class="chat-suggestions">
+                    <button class="suggestion-btn">💡 Tips</button>
+                    <button class="suggestion-btn">🚀 Motivation</button>
+                    <button class="suggestion-btn">⏰ Time help</button>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Ask Nora anything...">
+                    <button class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script>
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+    document.getElementById('notifyBtn').addEventListener('click', async () => {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            const swReg = await navigator.serviceWorker.register('/sw.js');
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                const keyArray = urlBase64ToUint8Array('BPKe93F_4Q5uHLEaUL0lYE3AK0x2GrtmfhzGs89UCBecSR5P44c7AEAi_6GIgSmFBaIebyO55AdWz2pmTMqBElQ');
+                console.log('VAPID key length:', keyArray.length, 'First byte:', keyArray[0]);
+                const subscription = await swReg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: keyArray
+                });
+                await fetch('/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
+                alert('Notifications enabled!');
+            } else {
+                alert('Notifications not allowed');
+            }
+        } else {
+            alert('Push messaging not supported');
+        }
+    });
+    </script>
+<script>
+const chatInput = document.getElementById('chatInput');
+const chatMessages = document.getElementById('chatMessages');
+const sendBtn = document.querySelector('.send-btn');
+
+function appendMessage(text, isUser) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'message ' + (isUser ? 'user-message' : 'bot-message');
+    msgDiv.innerHTML = `
+        <div class="message-avatar"><i class="fas fa-brain"></i></div>
+        <div class="message-content"><p>${text}</p></div>
+    `;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    appendMessage(text, true);
+    chatInput.value = '';
+    fetch('/askGemini', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: text})
+    })
+    .then(res => res.json())
+    .then(data => appendMessage(data.response, false))
+    .catch(() => appendMessage('Error contacting AI.', false));
+}
+
+sendBtn.disabled = false;
+chatInput.disabled = false;
+sendBtn.onclick = sendMessage;
+chatInput.onkeypress = function(e) { if (e.key === 'Enter') sendMessage(); };
+</script>
+<script>
+const suggestions = [
+    { label: "Tips", message: "Give me a productivity tip." },
+    { label: "Motivation", message: "Give me some motivation." },
+    { label: "Time help", message: "Help me manage my time better." }
+];
+
+document.querySelectorAll('.suggestion-btn').forEach((btn, idx) => {
+    btn.disabled = false;
+    btn.onclick = function() {
+        const text = suggestions[idx].message;
+        appendMessage(text, true);
+        fetch('/askGemini', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: text})
+        })
+        .then(res => res.json())
+        .then(data => appendMessage(data.response, false))
+        .catch(() => appendMessage('Error contacting AI.', false));
+    };
+});
+</script>
+</body>
+</html>

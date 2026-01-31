@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Push Notification Test</title>
+</head>
+<body>
+    <h1>Push Notification Test</h1>
+    <button id="testBtn">Test Push Subscription</button>
+    <div id="output"></div>
+
+    <script>
+        function log(message) {
+            console.log(message);
+            document.getElementById('output').innerHTML += '<p>' + message + '</p>';
+        }
+
+        async function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            log('Starting push subscription test...');
+            
+            if (!('serviceWorker' in navigator)) {
+                log('❌ Service Worker not supported');
+                return;
+            }
+            
+            if (!('PushManager' in window)) {
+                log('❌ PushManager not supported');
+                return;
+            }
+            
+            log('✅ Service Worker and PushManager supported');
+            
+            try {
+                // Register service worker
+                log('Registering service worker...');
+                const swReg = await navigator.serviceWorker.register('/sw.js');
+                log('✅ Service Worker registered');
+                
+                // Request permission
+                log('Requesting notification permission...');
+                const permission = await Notification.requestPermission();
+                log('Permission result: ' + permission);
+                
+                if (permission !== 'granted') {
+                    log('❌ Permission denied');
+                    return;
+                }
+                
+                // Create VAPID key
+                log('Creating VAPID key...');
+                const vapidKey = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqJ7Gd2hp7m2WS7gOiKOdxW3uoyO859_sTmQlS3sNx_mtx74385eRYDfgQ9CdAcQozkLqBrUaXKIrZMosDIwL3Q';
+                log('VAPID key length: ' + vapidKey.length);
+                log('VAPID key: ' + vapidKey);
+                
+                const applicationServerKey = urlBase64ToUint8Array(vapidKey);
+                log('✅ Application server key created');
+                
+                // Subscribe to push
+                log('Subscribing to push notifications...');
+                const subscription = await swReg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey
+                });
+                log('✅ Push subscription created');
+                log('Subscription endpoint: ' + subscription.endpoint);
+                
+                // Send to server
+                log('Sending subscription to server...');
+                const response = await fetch('/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
+                
+                if (response.ok) {
+                    log('✅ Subscription sent to server successfully');
+                } else {
+                    log('❌ Server error: ' + response.status + ' ' + response.statusText);
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+                console.error('Full error:', error);
+            }
+        });
+    </script>
+</body>
+</html> 
