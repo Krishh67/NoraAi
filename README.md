@@ -241,4 +241,4 @@ For support and questions:
 
 ---
 
-**Happy coding with Norait! 🚀**
+**Happy coding with Nora ai! 🚀**
