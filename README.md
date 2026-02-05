@@ -1,5 +1,9 @@
 # Nora ai 
 
+
+https://github.com/user-attachments/assets/93800055-e677-43d8-9eb3-310225305b4f
+
+
 This project has been migrated to use Python (Flask) for backend logic and templating. The dashboard UI remains the same, but all data is now rendered from Python using Jinja2 templates.
 
 ## How to Run (Python/Flask)
