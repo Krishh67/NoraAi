@@ -1,4 +1,4 @@
-# Norait - Flask Python Version
+# Nora ai 
 
 This project has been migrated to use Python (Flask) for backend logic and templating. The dashboard UI remains the same, but all data is now rendered from Python using Jinja2 templates.
 
@@ -17,7 +17,7 @@ This project has been migrated to use Python (Flask) for backend logic and templ
 
 ---
 
-# Norait - Engineering Companion Dashboard
+# Nora ai - Engineering Companion Dashboard
 
 Norait is a comprehensive web dashboard designed specifically for engineers to help them stay focused, monitor their productivity, and grow in their careers. It features real-time activity monitoring, AI-powered assistance, and a suite of productivity tools.
 
